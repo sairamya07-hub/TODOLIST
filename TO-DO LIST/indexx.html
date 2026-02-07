@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive To-Do List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .app-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .input-section {
+            padding: 25px;
+            background-color: #f9f9ff;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .task-input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .task-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .task-input:focus {
+            border-color: #6e8efb;
+            outline: none;
+        }
+
+        .priority-select {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .add-btn {
+            padding: 15px 25px;
+            background-color: #6e8efb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .add-btn:hover {
+            background-color: #5a7dfa;
+            transform: translateY(-2px);
+        }
+
+        .reminder-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .reminder-option input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .notification-badge {
+            background-color: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+
+        .tasks-section {
+            padding: 25px;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section-title h2 {
+            font-size: 1.5rem;
+            color: #444;
+        }
+
+        .task-filters {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 15px;
+            background-color: #f1f3ff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .filter-btn.active {
+            background-color: #6e8efb;
+            color: white;
+        }
+
+        .task-list {
+            list-style-type: none;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 18px;
+            background-color: #f9f9ff;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            border-left: 5px solid #ddd;
+        }
+
+        .task-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .task-item.high {
+            border-left-color: #ff4757;
+        }
+
+        .task-item.medium {
+            border-left-color: #ffa502;
+        }
+
+        .task-item.low {
+            border-left-color: #2ed573;
+        }
+
+        .task-item.completed {
+            opacity: 0.7;
+            background-color: #f0f0f0;
+        }
+
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+            color: #777;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .priority-tag {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .priority-high {
+            background-color: #ff4757;
+            color: white;
+        }
+
+        .priority-medium {
+            background-color: #ffa502;
+            color: white;
+        }
+
+        .priority-low {
+            background-color: #2ed573;
+            color: white;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background-color: #f1f3ff;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            background-color: #6e8efb;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #ff4757;
+        }
+
+        .notification-section {
+            padding: 20px 25px;
+            background-color: #f9f9ff;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .notification-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background-color: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #6e8efb;
+        }
+
+        .notification-text {
+            font-size: 0.95rem;
+        }
+
+        .notification-time {
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        .clear-notifications {
+            display: block;
+            margin: 15px auto 0;
+            padding: 10px 20px;
+            background-color: transparent;
+            border: 2px solid #6e8efb;
+            color: #6e8efb;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .clear-notifications:hover {
+            background-color: #6e8efb;
+            color: white;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background-color: #6e8efb;
+            color: white;
+            padding: 15px;
+            border-radius: 0 0 15px 15px;
+            text-align: center;
+        }
+
+        .stat-item h3 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #777;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+
+        @media (max-width: 768px) {
+            .task-input-row {
+                flex-direction: column;
+            }
+            
+            .task-input, .priority-select, .add-btn {
+                width: 100%;
+            }
+            
+            .task-filters {
+                flex-wrap: wrap;
+            }
+            
+            .task-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .task-actions {
+                align-self: flex-end;
+                margin-top: 15px;
+            }
+        }
+
+        .notification-sound {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tasks"></i> Interactive To-Do List</h1>
+            <p>Stay organized with reminders, priorities, and notifications</p>
+        </header>
+        
+        <div class="app-container">
+            <div class="input-section">
+                <div class="task-input-row">
+                    <input type="text" class="task-input" id="taskInput" placeholder="Enter a new task...">
+                    <select class="priority-select" id="prioritySelect">
+                        <option value="low">Low Priority</option>
+                        <option value="medium">Medium Priority</option>
+                        <option value="high">High Priority</option>
+                    </select>
+                    <button class="add-btn" id="addTaskBtn">
+                        <i class="fas fa-plus"></i> Add Task
+                    </button>
+                </div>
+                <div class="reminder-option">
+                    <label for="reminderTime">
+                        <i class="far fa-clock"></i> Set Reminder:
+                    </label>
+                    <input type="datetime-local" id="reminderTime">
+                </div>
+            </div>
+            
+            <div class="tasks-section">
+                <div class="section-title">
+                    <h2>Your Tasks <span id="taskCount" class="notification-badge">0</span></h2>
+                    <div class="task-filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="active">Active</button>
+                        <button class="filter-btn" data-filter="completed">Completed</button>
+                    </div>
+                </div>
+                
+                <ul class="task-list" id="taskList">
+                    <!-- Tasks will be added here dynamically -->
+                    <div class="empty-state" id="emptyState">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>No tasks yet</h3>
+                        <p>Add a task above to get started!</p>
+                    </div>
+                </ul>
+            </div>
+            
+            <div class="notification-section">
+                <div class="section-title">
+                    <h2>Notifications <span id="notificationCount" class="notification-badge">0</span></h2>
+                </div>
+                <div id="notificationList">
+                    <!-- Notifications will appear here -->
+                    <div class="empty-state" id="emptyNotifications">
+                        <i class="fas fa-bell-slash"></i>
+                        <h3>No notifications</h3>
+                        <p>Reminders and task updates will appear here</p>
+                    </div>
+                </div>
+                <button class="clear-notifications" id="clearNotifications">Clear All Notifications</button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <h3 id="totalTasks">0</h3>
+                    <p>Total Tasks</p>
+                </div>
+                <div class="stat-item">
+                    <h3 id="completedTasks">0</h3>
+                    <p>Completed</p>
+                </div>
+                <div class="stat-item">
+                    <h3 id="pendingTasks">0</h3>
+                    <p>Pending</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification sound (hidden) -->
+    <audio class="notification-sound" id="notificationSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const taskInput = document.getElementById('taskInput');
+            const prioritySelect = document.getElementById('prioritySelect');
+            const addTaskBtn = document.getElementById('addTaskBtn');
+            const reminderTime = document.getElementById('reminderTime');
+            const taskList = document.getElementById('taskList');
+            const emptyState = document.getElementById('emptyState');
+            const notificationList = document.getElementById('notificationList');
+            const emptyNotifications = document.getElementById('emptyNotifications');
+            const clearNotificationsBtn = document.getElementById('clearNotifications');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const notificationSound = document.getElementById('notificationSound');
+            
+            // Counter elements
+            const taskCount = document.getElementById('taskCount');
+            const notificationCount = document.getElementById('notificationCount');
+            const totalTasks = document.getElementById('totalTasks');
+            const completedTasks = document.getElementById('completedTasks');
+            const pendingTasks = document.getElementById('pendingTasks');
+            
+            // Initialize tasks and notifications from localStorage or defaults
+            let tasks = JSON.parse(localStorage.getItem('todoTasks')) || [];
+            let notifications = JSON.parse(localStorage.getItem('todoNotifications')) || [];
+            let currentFilter = 'all';
+            let reminderCheckInterval;
+            
+            // Set minimum date/time for reminder input to current time
+            const now = new Date();
+            const nowFormatted = now.toISOString().slice(0, 16);
+            reminderTime.min = nowFormatted;
+            
+            // Initialize the app
+            function initApp() {
+                renderTasks();
+                renderNotifications();
+                updateStats();
+                startReminderChecker();
+            }
+            
+            // Add task function
+            function addTask() {
+                const title = taskInput.value.trim();
+                const priority = prioritySelect.value;
+                const reminder = reminderTime.value;
+                
+                if (!title) {
+                    showNotification('Please enter a task title!', 'error');
+                    taskInput.focus();
+                    return;
+                }
+                
+                const newTask = {
+                    id: Date.now(),
+                    title: title,
+                    priority: priority,
+                    completed: false,
+                    createdAt: new Date().toISOString(),
+                    reminder: reminder || null
+                };
+                
+                tasks.push(newTask);
+                saveTasks();
+                renderTasks();
+                updateStats();
+                
+                // Show success notification
+                showNotification(`Task "${title}" added successfully!`, 'success');
+                
+                // Reset input fields
+                taskInput.value = '';
+                reminderTime.value = '';
+                taskInput.focus();
+                
+                // If reminder is set, show confirmation
+                if (reminder) {
+                    const reminderDate = new Date(reminder);
+                    const timeString = reminderDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    showNotification(`Reminder set for ${timeString}`, 'reminder');
+                }
+            }
+            
+            // Render tasks based on current filter
+            function renderTasks() {
+                // Filter tasks based on current filter
+                let filteredTasks = tasks;
+                if (currentFilter === 'active') {
+                    filteredTasks = tasks.filter(task => !task.completed);
+                } else if (currentFilter === 'completed') {
+                    filteredTasks = tasks.filter(task => task.completed);
+                }
+                
+                // If no tasks, show empty state
+                if (filteredTasks.length === 0) {
+                    emptyState.style.display = 'block';
+                    taskList.innerHTML = '';
+                    taskList.appendChild(emptyState);
+                } else {
+                    emptyState.style.display = 'none';
+                    
+                    // Sort tasks: high priority first, then by creation time
+                    filteredTasks.sort((a, b) => {
+                        const priorityOrder = { high: 3, medium: 2, low: 1 };
+                        if (priorityOrder[b.priority] !== priorityOrder[a.priority]) {
+                            return priorityOrder[b.priority] - priorityOrder[a.priority];
+                        }
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    });
+                    
+                    // Generate task HTML
+                    taskList.innerHTML = filteredTasks.map(task => `
+                        <li class="task-item ${task.priority} ${task.completed ? 'completed' : ''}" data-id="${task.id}">
+                            <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
+                            <div class="task-content">
+                                <div class="task-title">${task.title}</div>
+                                <div class="task-meta">
+                                    <span class="priority-tag priority-${task.priority}">
+                                        ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
+                                    </span>
+                                    ${task.reminder ? 
+                                        `<span><i class="far fa-clock"></i> ${formatReminderTime(task.reminder)}</span>` : 
+                                        ''
+                                    }
+                                    <span><i class="far fa-calendar"></i> ${formatDate(task.createdAt)}</span>
+                                </div>
+                            </div>
+                            <div class="task-actions">
+                                ${task.reminder ? 
+                                    `<button class="action-btn remove-reminder-btn" title="Remove Reminder">
+                                        <i class="far fa-bell-slash"></i>
+                                    </button>` : 
+                                    `<button class="action-btn add-reminder-btn" title="Add Reminder">
+                                        <i class="far fa-bell"></i>
+                                    </button>`
+                                }
+                                <button class="action-btn delete-btn" title="Delete Task">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </li>
+                    `).join('');
+                }
+                
+                // Update task count badge
+                taskCount.textContent = tasks.filter(task => !task.completed).length;
+            }
+            
+            // Render notifications
+            function renderNotifications() {
+                // If no notifications, show empty state
+                if (notifications.length === 0) {
+                    emptyNotifications.style.display = 'block';
+                    notificationList.innerHTML = '';
+                    notificationList.appendChild(emptyNotifications);
+                } else {
+                    emptyNotifications.style.display = 'none';
+                    
+                    // Show latest notifications first
+                    const sortedNotifications = [...notifications].reverse();
+                    
+                    // Generate notification HTML
+                    notificationList.innerHTML = sortedNotifications.map(notification => `
+                        <div class="notification-item">
+                            <div class="notification-text">
+                                <i class="fas ${notification.type === 'reminder' ? 'fa-bell' : 
+                                              notification.type === 'success' ? 'fa-check-circle' : 
+                                              notification.type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                                ${notification.message}
+                            </div>
+                            <div class="notification-time">${formatTime(notification.timestamp)}</div>
+                        </div>
+                    `).join('');
+                }
+                
+                // Update notification count badge
+                notificationCount.textContent = notifications.length;
+            }
+            
+            // Show new notification
+            function showNotification(message, type = 'info') {
+                const newNotification = {
+                    id: Date.now(),
+                    message: message,
+                    type: type,
+                    timestamp: new Date().toISOString()
+                };
+                
+                notifications.push(newNotification);
+                
+                // Keep only last 10 notifications
+                if (notifications.length > 10) {
+                    notifications = notifications.slice(-10);
+                }
+                
+                saveNotifications();
+                renderNotifications();
+                
+                // Play notification sound for reminders
+                if (type === 'reminder') {
+                    notificationSound.currentTime = 0;
+                    notificationSound.play().catch(e => console.log("Audio play failed:", e));
+                }
+            }
+            
+            // Update statistics
+            function updateStats() {
+                const total = tasks.length;
+                const completed = tasks.filter(task => task.completed).length;
+                const pending = total - completed;
+                
+                totalTasks.textContent = total;
+                completedTasks.textContent = completed;
+                pendingTasks.textContent = pending;
+            }
+            
+            // Format date for display
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }
+            
+            // Format time for display
+            function formatTime(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            }
+            
+            // Format reminder time for display
+            function formatReminderTime(reminderString) {
+                const date = new Date(reminderString);
+                return `Reminder: ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+            }
+            
+            // Check for reminders
+            function checkReminders() {
+                const now = new Date();
+                
+                tasks.forEach(task => {
+                    if (task.reminder && !task.completed) {
+                        const reminderTime = new Date(task.reminder);
+                        // Check if reminder time is within the next minute
+                        const timeDiff = reminderTime.getTime() - now.getTime();
+                        
+                        if (timeDiff > 0 && timeDiff <= 60000) {
+                            // Show reminder notification
+                            showNotification(`Reminder: "${task.title}" is due now!`, 'reminder');
+                            
+                            // Remove the reminder after triggering
+                            task.reminder = null;
+                            saveTasks();
+                            renderTasks();
+                        }
+                    }
+                });
+            }
+            
+            // Start interval to check for reminders
+            function startReminderChecker() {
+                if (reminderCheckInterval) {
+                    clearInterval(reminderCheckInterval);
+                }
+                
+                reminderCheckInterval = setInterval(checkReminders, 30000); // Check every 30 seconds
+            }
+            
+            // Save tasks to localStorage
+            function saveTasks() {
+                localStorage.setItem('todoTasks', JSON.stringify(tasks));
+            }
+            
+            // Save notifications to localStorage
+            function saveNotifications() {
+                localStorage.setItem('todoNotifications', JSON.stringify(notifications));
+            }
+            
+            // Event Listeners
+            addTaskBtn.addEventListener('click', addTask);
+            
+            taskInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addTask();
+                }
+            });
+            
+            // Task list event delegation
+            taskList.addEventListener('click', (e) => {
+                const taskItem = e.target.closest('.task-item');
+                if (!taskItem) return;
+                
+                const taskId = parseInt(taskItem.dataset.id);
+                const task = tasks.find(t => t.id === taskId);
+                
+                // Toggle completion status
+                if (e.target.classList.contains('task-checkbox')) {
+                    task.completed = e.target.checked;
+                    saveTasks();
+                    renderTasks();
+                    updateStats();
+                    
+                    const action = task.completed ? 'completed' : 'marked as active';
+                    showNotification(`Task "${task.title}" ${action}`, 'success');
+                }
+                
+                // Delete task
+                if (e.target.closest('.delete-btn')) {
+                    if (confirm(`Are you sure you want to delete "${task.title}"?`)) {
+                        tasks = tasks.filter(t => t.id !== taskId);
+                        saveTasks();
+                        renderTasks();
+                        updateStats();
+                        showNotification(`Task "${task.title}" deleted`, 'info');
+                    }
+                }
+                
+                // Add reminder
+                if (e.target.closest('.add-reminder-btn')) {
+                    // Show datetime picker near the button
+                    const reminderInput = document.createElement('input');
+                    reminderInput.type = 'datetime-local';
+                    reminderInput.min = new Date().toISOString().slice(0, 16);
+                    
+                    // Position it near the button
+                    const btnRect = e.target.closest('.add-reminder-btn').getBoundingClientRect();
+                    reminderInput.style.position = 'fixed';
+                    reminderInput.style.top = `${btnRect.bottom + 5}px`;
+                    reminderInput.style.left = `${btnRect.left}px`;
+                    reminderInput.style.zIndex = '1000';
+                    
+                    document.body.appendChild(reminderInput);
+                    reminderInput.focus();
+                    
+                    // Handle when a date is selected
+                    reminderInput.addEventListener('change', function() {
+                        if (this.value) {
+                            task.reminder = this.value;
+                            saveTasks();
+                            renderTasks();
+                            
+                            const reminderDate = new Date(this.value);
+                            const timeString = reminderDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            showNotification(`Reminder set for "${task.title}" at ${timeString}`, 'reminder');
+                        }
+                        
+                        document.body.removeChild(this);
+                    });
+                    
+                    // Remove if user clicks elsewhere
+                    document.addEventListener('click', function removeReminderInput(event) {
+                        if (!reminderInput.contains(event.target) && !e.target.closest('.add-reminder-btn')) {
+                            document.body.removeChild(reminderInput);
+                            document.removeEventListener('click', removeReminderInput);
+                        }
+                    });
+                }
+                
+                // Remove reminder
+                if (e.target.closest('.remove-reminder-btn')) {
+                    task.reminder = null;
+                    saveTasks();
+                    renderTasks();
+                    showNotification(`Reminder removed from "${task.title}"`, 'info');
+                }
+            });
+            
+            // Filter buttons
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    // Update filter and re-render
+                    currentFilter = button.dataset.filter;
+                    renderTasks();
+                });
+            });
+            
+            // Clear notifications button
+            clearNotificationsBtn.addEventListener('click', () => {
+                if (notifications.length > 0) {
+                    notifications = [];
+                    saveNotifications();
+                    renderNotifications();
+                    showNotification('All notifications cleared', 'info');
+                }
+            });
+            
+            // Add some sample tasks on first load
+            if (tasks.length === 0) {
+                const sampleTasks = [
+                    {
+                        id: 1,
+                        title: 'Complete project proposal',
+                        priority: 'high',
+                        completed: false,
+                        createdAt: new Date(Date.now() - 86400000).toISOString(),
+                        reminder: new Date(Date.now() + 3600000).toISOString()
+                    },
+                    {
+                        id: 2,
+                        title: 'Buy groceries',
+                        priority: 'medium',
+                        completed: false,
+                        createdAt: new Date(Date.now() - 43200000).toISOString(),
+                        reminder: null
+                    },
+                    {
+                        id: 3,
+                        title: 'Schedule team meeting',
+                        priority: 'low',
+                        completed: true,
+                        createdAt: new Date(Date.now() - 172800000).toISOString(),
+                        reminder: null
+                    }
+                ];
+                
+                tasks = sampleTasks;
+                saveTasks();
+                
+                // Add sample notifications
+                const sampleNotifications = [
+                    {
+                        id: 1,
+                        message: 'Welcome to your Interactive To-Do List!',
+                        type: 'success',
+                        timestamp: new Date(Date.now() - 1800000).toISOString()
+                    },
+                    {
+                        id: 2,
+                        message: 'Team meeting completed successfully',
+                        type: 'info',
+                        timestamp: new Date(Date.now() - 3600000).toISOString()
+                    }
+                ];
+                
+                notifications = sampleNotifications;
+                saveNotifications();
+            }
+            
+            // Initialize the app
+            initApp();
+        });
+    </script>
+</body>
+</html>
